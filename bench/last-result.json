@@ -1,0 +1,26 @@
+{
+  "note": "Reproducible run of the REAL CacheCore pipeline against real Postgres+pgvector and Redis (Testcontainers), using a deterministic bag-of-words MockProvider so it is $0 and deterministic. Reproduce with: npx tsx bench/run.ts (threshold via SEMANTIC_THRESHOLD). The same pipeline runs against live Gemini when GEMINI_API_KEY is set. Mock embeddings capture lexical overlap, not full semantics, so the threshold that surfaces semantic hits with the mock (~0.7) is lower than the production default (0.92) tuned for a real embedding model.",
+  "machine": "single dev machine, Docker Desktop, Postgres pgvector:pg16 + redis:7",
+  "runs": [
+    {
+      "requests": 1000,
+      "workload": "85% paraphrased intents (5 intents x 4 phrasings) + 15% unique",
+      "threshold": 0.7,
+      "outcomes": { "exact_hit": 738, "semantic_hit": 165, "miss": 97, "error": 0 },
+      "hitRate": "90.3%",
+      "generationsAvoided": 903,
+      "latencyMs": { "hit_p50": 7.68, "hit_p99": 40.29, "miss_p50": 80.13, "miss_p99": 178.68 },
+      "costUsd": { "spent": 0.029257, "saved": 0.271686, "savedPct": "90.3%" }
+    },
+    {
+      "requests": 1000,
+      "workload": "85% paraphrased intents (5 intents x 4 phrasings) + 15% unique",
+      "threshold": 0.9,
+      "outcomes": { "exact_hit": 822, "semantic_hit": 0, "miss": 178, "error": 0 },
+      "hitRate": "82.2%",
+      "note": "At 0.9 with the lexical mock, paraphrases with low word-overlap fall below threshold so only exact repeats hit. Demonstrates the threshold/precision trade-off the README discusses.",
+      "latencyMs": { "hit_p50": 7.47, "hit_p99": 20.31, "miss_p50": 83.65, "miss_p99": 138.3 },
+      "costUsd": { "spent": 0.053701, "saved": 0.247268, "savedPct": "82.2%" }
+    }
+  ]
+}
